@@ -1,12 +1,13 @@
 const Pool = require('pg').Pool;
 
 const pool = new Pool({
-    user: 'postgres',
-    // host: 'localhost',
-    host: 'music.c7xclwu5il92.us-east-1.rds.amazonaws.com',
-    database: 'music',
-    password: 'postgres',
-    port: 5432
+    // user: 'postgres',
+    // // host: 'localhost',
+    // host: 'music.c7xclwu5il92.us-east-1.rds.amazonaws.com',
+    // database: 'music',
+    // password: 'postgres',
+    // port: 5432
+    connectionString: process.env.PSQL_CONNECTION
 });
 
 const getAllSongs = (req, res) => {
@@ -20,10 +21,10 @@ const getAllSongs = (req, res) => {
 
 const addSong = (req, res) => {
     try {
-        const { song_name, artist, duration, play_count, track_listing } = req.body;
+        const { name, artistid, duration, play_count, img } = req.body;
         pool.query(
-            `INSERT INTO songs (song_name, artist, duration, play_count, track_listing) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [song_name, artist, duration, play_count, track_listing],
+            `INSERT INTO songs (name, artistid, duration, play_count, img) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+            [name, artistid, duration, play_count, img],
             (error, results) => {
                 if (error) {
                     console.log(error, '<--- error here')
@@ -41,7 +42,7 @@ const addSong = (req, res) => {
 const deleteSongById = (req, res) => {
     const song_id = parseInt(req.params.song_id);
 
-    pool.query(`DELETE FROM songs WHERE song_id=${song_id}`, (error, results) => {
+    pool.query(`DELETE FROM songs WHERE id=${song_id}`, (error, results) => {
         if(error){
             throw error;
         }
@@ -51,7 +52,9 @@ const deleteSongById = (req, res) => {
 
 const updateSongNameById = (req, res) => {
     const { song_id } = req.params;
+    // gives us an array of all the keys on req.body
     const keys = Object.keys(req.body);
+    // gives us an array of all the values on req.body
     const values = Object.values(req.body);
 
     // Adding to our UPDATE sql statement
@@ -69,7 +72,7 @@ const updateSongNameById = (req, res) => {
     }
 
     pool.query(
-        `UPDATE songs SET ${configureString()} WHERE song_id=$${keys.length+1}`,
+        `UPDATE songs SET ${configureString()} WHERE id=$${keys.length+1}`,
         [...values, song_id],
         (error, results) => {
             if(error){

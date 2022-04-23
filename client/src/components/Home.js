@@ -8,6 +8,10 @@ class Home extends React.Component {
     }
     
     componentDidMount(){
+        this.refresh();
+    }
+
+    refresh = () => {
         getAllSongs().then(res => {
             this.setState({ songs: res });
         });
@@ -16,9 +20,12 @@ class Home extends React.Component {
     render(){
         return (
             <div>
-                <AddSongs />
-                <ul>
-                    {this.state.songs.map(song => <li key={song.song_id}>{song.song_name}</li>)}
+                <AddSongs refresh={this.refresh}/>
+                <ul className='song-card'>
+                    {this.state.songs.map(song => <li key={song.id}>
+                        <img className='mini' src={song.img}alt={song.name}/>
+                        {song.name}
+                    </li>)}
                 </ul>
             </div>
         )
