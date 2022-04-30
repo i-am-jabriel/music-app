@@ -1,59 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { addSong } from './networkRequests';
 
-class AddSong extends React.Component {
-    state = {
-       name: "",
-       artistid: "",
-       duration: "",
-       play_count: "",
-       img: ""
+// class AddSong extends React.Component {
+export default function AddSong(props){
+    const [state, setState] = useState({
+        name: "",
+        artistid: "",
+        duration: "",
+        play_count: "",
+        img: ""
+     });
+
+    const handleChange = (e) => {
+        setState({...state, [e.target.name]: e.target.value });
     }
 
-    handleChange = (e) => {
-        this.setState({ [e.target.name]: e.target.value });
+    const submitSong = () => {
+        addSong(state)
+            .then(refresh);
     }
 
-    onClick = () => {
-        addSong(this.state)
-            .then(this.refresh);
-    }
+    const refresh = () => {
+        // $todo make this dyanmic isntead of statically resetting
 
-    refresh = () => {
-        this.setState({
+        // after adding a song we want to make sure to clear the inputs so a user can add another song
+        setState({
             name: "",
             artistid: "",
             duration: "",
             play_count: "",
             img: ""
         });
-        this.props.refresh();
+
+        // props are attributes passed from parent components into child components
+        // after submitting a new song we need the users list of songs to update so they can see the new song
+        props.refresh();
     }
 
-    render(){
-        return(
-            <div className="add-song-wrap">
-                <h1>Add Song!</h1>
-                {/* <label>Song name: </label>
-                <input onChange={this.handleChange} name="song_name"></input>
-                <label>Artist: </label>
-                <input onChange={this.handleChange} name="artist"></input>
-                <label>Duration: </label>
-                <input onChange={this.handleChange} name="duration"></input>
-                <label>Track Listing: </label>
-                <input onChange={this.handleChange} name="track_listing"></input> 
-
-                
-                Doing this statically will drive you INSANE
-                */}
-                {Object.keys(this.state).map(name => <div key={name}>
-                    <label>{name}</label>
-                    <input onChange={this.handleChange} value={this.state[name]} name={name}/>
-                </div>)}
-                <button onClick={this.onClick}>Submit</button>
-            </div>
-        )
-    }
+    return(
+        <div className="add-song-wrap">
+            <h1>Add Song!</h1>
+           {/* Need to use state because thats where the data is
+            Array.map*/
+            Object.keys(state).map(key => <>
+                <label>{key}</label>
+                <input onChange={handleChange} name={key} value={state[key]}/>
+            </>)}
+            
+            <button onClick={submitSong}>Submit</button>
+        </div>
+    )
 }
-
-export default AddSong;
